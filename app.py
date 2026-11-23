@@ -1,41 +1,43 @@
-import random
 import streamlit as st
+import pandas as pd
 
-# 페이지 기본 설정
-st.set_page_config(page_title="오늘 뭐 먹지?", page_icon="🍱")
-
-# 제목 및 설명
-st.title("🍱 오늘의 점심 메뉴 추천기")
-st.write("결정 장애 해결! 아래 버튼을 눌러 오늘의 점심 메뉴를 뽑아보세요.")
-
-# 추천할 점심 메뉴 리스트 (원하는 메뉴를 자유롭게 추가/수정하세요)
-lunch_menus = [
-    "김치찌개",
-    "된장찌개",
-    "제육볶음",
-    "돈가스",
-    "초밥",
-    "짜장면",
-    "짬뽕",
-    "마라탕",
-    "쌀국수",
-    "햄버거",
-    "파스타",
-    "국밥",
-    "비빔밥",
-    "부대찌개",
-    "샌드위치",
-    "라멘",
-    "카레",
+# 1. 초기 데이터 구성
+type_performance = [
+    ['겨울왕국', 0, '19만원'],
+    ['레베카', 27, '15만원'],
+    ['오페라의 유령', 116, '17만원']
 ]
 
-st.divider()
+# 2. 예매 함수 (def 및 if 조건문)
+def def_performance(pfm_name, ticket):
+    for pfm in type_performance:
+        if pfm[0] == pfm_name:
+            sit = pfm[1]
+            if sit <= 0:
+                st.error("이 공연의 티켓은 전부 매진 되었습니다.")
+            else:
+                pfm[1] = sit - ticket
+                st.success(f"{pfm_name} {ticket}매 예매 완료")
 
-# 버튼 생성 및 클릭 이벤트 처리
-if st.button("🎲 오늘의 점심 메뉴 뽑기!", use_container_width=True):
-  # random.choice()를 사용해 리스트에서 무작위로 하나 선택
-  selected_menu = random.choice(lunch_menus)
+# 3. 처음 화면 (입력)
+selected_pfm = st.text_input("공연선택:[공연목록:겨울왕국 / 레베카 / 오페라의 유령]")
+ticket_num = st.number_input("공연티켓 갯수 입력:[1~300개까지]", min_value=1, max_value=300, step=1)
 
-  # 결과 출력 및 축하 효과
-  st.success(f"오늘의 추천 메뉴는 **'{selected_menu}'** 입니다! 맛있게 드세요! 😋")
-  st.balloons()
+# 4. 버튼을 눌렀을 때만 결과 화면 등장
+if st.button("예매하기"):
+    # 함수 실행
+    def_performance(selected_pfm, ticket_num)
+
+    # for문 순회 후 데이터프레임 전환
+    df_data = []
+    for item in type_performance:
+        df_data.append({
+            '공연명': item[0],
+            '남은좌석의 갯수': item[1],
+            '공연금액': item[2]
+        })
+
+    df = pd.DataFrame(df_data)
+
+    # 결과 표 출력
+    st.table(df)
